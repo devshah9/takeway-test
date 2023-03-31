@@ -15,7 +15,10 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
+from sm_api.views import trigger_report, get_report
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('trigger_report/', trigger_report, name='trigger_report'),
+    path('get_report/', get_report, name='get_report'),
 ]

@@ -19,7 +19,7 @@ def populate_store_table(csv_file):
             store.save()
 
 
-def populate_store_table(input_file_path):
+def populate_business_hours_table(input_file_path):
 
     existing_rows = set()
 
@@ -81,4 +81,42 @@ def populate_store_table(input_file_path):
                         row[1]), start_time_utc=row[2], end_time_utc=row[3])
 
 
-populate_store_table('Menu hours.csv')
+
+def populate_store_status_table(file_path):
+    with open(file_path, newline='') as csvfile:
+        reader = csv.reader(csvfile)
+        next(reader)
+        index = 0
+        already_in_db = StoreStatus.objects.all().count()
+        if already_in_db:
+            for i in range(already_in_db): 
+                next(reader)
+        # for i in range():
+        #     next(reader)
+        
+        store_status_list = []
+        for row in reader:
+
+            store_id = row[0]
+            status = row[1]
+            timestamp_str = row[2]
+
+            # Get the Store object for this store_id
+            store, created = Store.objects.get_or_create(store_id=int(store_id))
+            
+            # Convert the timestamp string to a datetime object
+            try:
+                timestamp_utc = datetime.strptime(timestamp_str, '%Y-%m-%d %H:%M:%S.%f %Z')
+            except ValueError:         
+                timestamp_utc = datetime.strptime(timestamp_str, '%Y-%m-%d %H:%M:%S %Z')
+            timestamp_utc = pytz.utc.localize(timestamp_utc)
+           
+            store_status_list.append(StoreStatus(store=store, timestamp_utc=timestamp_utc, status=status))
+            
+            index += 1
+            if index % 1000 == 0:
+                print(index)
+                StoreStatus.objects.bulk_create(store_status_list)
+                store_status_list = []
+        if store_status_list:
+            StoreStatus.objects.bulk_create(store_status_list)
