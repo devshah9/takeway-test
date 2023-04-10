@@ -18,10 +18,6 @@ class StoreStatus(models.Model):
     status = models.CharField(max_length=10)
 
 class Report(models.Model):
-    STATUS_CHOICES = (
-        ('running', 'Running'),
-        ('complete', 'Complete'),
-    )
-    status = models.CharField(choices=STATUS_CHOICES, default='running', max_length=10)
+    status = models.CharField(default='running', max_length=10)
     report_file = models.FileField(upload_to='reports/', null=True, blank=True)
     name = models.CharField(max_length=20)
